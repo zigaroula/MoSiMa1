@@ -101,7 +101,7 @@ to setup-turtles
     set location random world-size
     set salary random salary-max
     set activity random activities-number
-    set company-type random company-types-number
+    set company-type 1 + (random (company-types-number - 1))
     ;;-------
     set employed 0
     set partner 0
@@ -272,10 +272,12 @@ to-report matching-quality [a b]
 
   if(a-location = b-location) [ set res res + 1 ] ;; location
   if(a-activity = b-activity) [ set res res + 1 ] ;; activity
-  if(a-company = b-company) [ set res res + 1 ] ;; company type
+  
+  let temp max (list a-company b-company)
+  set res res + (1 - abs(a-company - b-company) / temp ) ;; company type
 
-  let maximum max (list a-salary b-salary)
-  set res res + (1 - abs(a-salary - b-salary) / maximum ) ;; salary
+  set temp max (list a-salary b-salary)
+  set res res + (1 - abs(a-salary - b-salary) / temp ) ;; salary
 
   set res res / 5 ;;normalize
   
@@ -333,20 +335,20 @@ end
 
 ;; Plotting function for the unemployement graph
 to update-plot-chomage
-  set-current-plot "chomage"
+  set-current-plot "unemployment"
   set plottime (plottime + 1)
   
   plotxy plottime U
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-22
-444
-357
-800
+90
+10
+483
+424
 16
 16
-9.85
+11.61
 1
 10
 1
@@ -367,10 +369,10 @@ ticks
 30.0
 
 SLIDER
-43
-74
-215
-107
+720
+61
+892
+94
 unemployment
 unemployment
 10
@@ -382,10 +384,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-42
-111
-214
-144
+720
+92
+892
+125
 vacancy
 vacancy
 10
@@ -397,10 +399,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-321
-104
-575
-137
+722
+217
+1014
+250
 matching_quality_treshold
 matching_quality_treshold
 0
@@ -412,10 +414,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-362
-192
-585
-225
+722
+256
+1014
+289
 firing_quality_treshold
 firing_quality_treshold
 0
@@ -427,10 +429,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-363
-228
-552
-261
+723
+292
+1015
+325
 unexpected_firing
 unexpected_firing
 0
@@ -442,25 +444,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-363
-265
-622
-298
+723
+329
+1014
+362
 max_productivity_fluctuation
 max_productivity_fluctuation
 0
 1
-0.3
+0.4
 0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-22
-221
-317
-254
+720
+132
+1015
+165
 unexpected_company_motivation
 unexpected_company_motivation
 0
@@ -472,10 +474,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-22
-260
-301
-293
+720
+166
+1015
+199
 unexpected_worker_motivation
 unexpected_worker_motivation
 0
@@ -487,10 +489,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-90
-170
-262
-203
+895
+61
+1017
+94
 pairs_number
 pairs_number
 0
@@ -502,10 +504,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-180
-10
-253
-43
+11
+11
+84
+44
 NIL
 setup
 NIL
@@ -519,10 +521,10 @@ NIL
 1
 
 BUTTON
-257
 10
-320
-43
+50
+84
+83
 NIL
 go
 T
@@ -536,10 +538,10 @@ NIL
 1
 
 BUTTON
-402
-19
-492
-52
+1
+530
+91
+563
 NIL
 plot-fig2
 NIL
@@ -553,10 +555,10 @@ NIL
 1
 
 PLOT
-376
-421
-822
-788
+115
+440
+483
+649
 fig2
 u
 v
@@ -571,11 +573,11 @@ PENS
 "default" 1.0 2 -16777216 true "" ""
 
 PLOT
-860
-217
-1060
-367
-chomage
+496
+10
+696
+160
+unemployment
 ticks
 U
 0.0
@@ -587,6 +589,16 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" ""
+
+TEXTBOX
+788
+24
+938
+42
+Simulation parameters
+13
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
