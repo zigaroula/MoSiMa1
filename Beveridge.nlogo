@@ -9,11 +9,13 @@ matchings-own [
 ]
 persons-own [
   skills location salary
+  activity company-type
   employed partner
   productivity
 ]
 companies-own [
   skills location salary
+  activity company-type
   filled partner
 ]
 globals [
@@ -25,6 +27,8 @@ globals [
   salary-max
   plot-values
   plottime
+  activities-number
+  company-types-number
 ]
 
 ;; ----------- SETUP -----------
@@ -61,6 +65,8 @@ to setup-globals
   set Npairs pairs_number
   set world-size 20
   set salary-max 20000
+  set company-types-number 5
+  set activities-number 20
   set convergence 0
   set convergenceMax 50
   set epsilon max (list ((unemployment + vacancy) * 3 / 100) 1)
@@ -94,6 +100,8 @@ to setup-turtles
     set skills (list random 2 random 2 random 2 random 2 random 2)
     set location random world-size
     set salary random salary-max
+    set activity random activities-number
+    set company-type random company-types-number
     ;;-------
     set employed 0
     set partner 0
@@ -103,6 +111,8 @@ to setup-turtles
     set skills (list random 2 random 2 random 2 random 2 random 2)
     set location random world-size
     set salary random salary-max
+    set activity random activities-number
+    set company-type random company-types-number
     ;;-------
     set filled 0
     set partner 0
@@ -233,16 +243,24 @@ to-report matching-quality [a b]
   let b-location 0
   let a-salary 0
   let b-salary 0
+  let a-company 0
+  let b-company 0
+  let a-activity 0
+  let b-activity 0
 
   ask a [
     set a-skills skills
     set a-location location
     set a-salary salary
+    set a-activity activity
+    set a-company company-type
   ]
   ask b [
     set b-skills skills
     set b-location location
     set b-salary salary
+    set b-activity activity
+    set b-company company-type
   ]
   
   let i 0
@@ -253,11 +271,13 @@ to-report matching-quality [a b]
   set res res / 5 ;; skills
 
   if(a-location = b-location) [ set res res + 1 ] ;; location
+  if(a-activity = b-activity) [ set res res + 1 ] ;; activity
+  if(a-company = b-company) [ set res res + 1 ] ;; company type
 
   let maximum max (list a-salary b-salary)
   set res res + (1 - abs(a-salary - b-salary) / maximum ) ;; salary
 
-  set res res / 3 ;;normalize
+  set res res / 5 ;;normalize
   
   ;; bonuses
   if (random-float 1 < UCM) [ set res res * 1.1 ]
@@ -355,7 +375,7 @@ unemployment
 unemployment
 10
 500
-360
+190
 10
 1
 NIL
@@ -370,7 +390,7 @@ vacancy
 vacancy
 10
 500
-300
+500
 10
 1
 NIL
@@ -475,7 +495,7 @@ pairs_number
 pairs_number
 0
 100
-100
+40
 1
 1
 NIL
@@ -540,7 +560,7 @@ PLOT
 fig2
 u
 v
-0.75
+0.0
 1.0
 0.0
 4.0
@@ -556,7 +576,7 @@ PLOT
 1060
 367
 chomage
-plottime
+ticks
 U
 0.0
 10.0
