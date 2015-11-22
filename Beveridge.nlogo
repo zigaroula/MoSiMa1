@@ -12,6 +12,7 @@ persons-own [
   activity company-type
   employed partner
   productivity
+  satisfaction
 ]
 companies-own [
   skills location salary
@@ -106,6 +107,7 @@ to setup-turtles
     set employed 0
     set partner 0
     set productivity random-float 1
+    set satisfaction random-float 1
   ]
   create-companies V [
     set skills (list random 2 random 2 random 2 random 2 random 2)
@@ -159,8 +161,12 @@ end
 to go
   if(checkConvergence = 1) [ stop ]
   
-  firePersons
-  doMatches  
+  if(firing_type = "default") [ firePersons ]
+  if(firing_type = "random") [ firePersonsGlobal ]
+  if(firing_type = "decision") [ firePersonsDecision ]
+  
+  ifelse(matching_type = "default") [ doMatches ]
+  [ doMatchesGlobal ]  
 
   update-plot
   tick
@@ -177,12 +183,34 @@ to-report checkConvergence
   ifelse(convergence = convergenceMax) [report 1] [report 0]
 end
 
-;; Processes all the fires for one tick
+;; Processes all the firing for one tick
 to firePersons
   ask persons [
     if (employed > 0) [
       let current-productivity productivity - MPF + 2 * random-float MPF
       if (current-productivity < FQT or random-float 1 < UF) [ fire self partner ]
+    ]
+  ]
+end
+
+to firePersonsGlobal
+  let cpt (random (unemployment - U) )
+  ask persons [
+    if (employed > 0 and cpt > 0) [
+      fire self partner
+      set cpt cpt - 1
+    ]
+  ]
+end
+
+to firePersonsDecision
+  ask persons [
+    if (employed > 0) [
+      set satisfaction (random-normal satisfaction satisfaction_deviation)
+      if (satisfaction > 1) [set satisfaction 1]
+      if (satisfaction < 0) [set satisfaction 0]
+    
+      if(satisfaction < satisfaction_treshold) [ fire self partner ]
     ]
   ]
 end
@@ -204,6 +232,40 @@ to doMatches
   ]
 end
 
+to doMatchesGlobal
+  let cpt globalMatching
+  ask matchings [
+    while [cpt > 0] [
+      if (person-list != [] and company-list != []) [
+        let a one-of person-list
+        let b one-of company-list
+        match a b
+      ]
+      set cpt cpt - 1
+    ]
+  ]
+end
+
+to-report globalMatching 
+  if (matching_type = "global_naive") [
+    report V * (1 - exp( - U / V ) )
+  ]
+  if (matching_type = "global_L") [
+    let L unemployment
+    report V * (1 - exp( - U / ( L - U + V ) ) )
+  ]
+  if (matching_type = "global_K") [
+    let K mismatch
+    report V * (1 - exp( - K * U / V ) )
+  ]
+  if (matching_type = "global_s") [
+    let s fraction
+    report V * (1 - exp( - s * U / V ) )
+  ]
+end
+
+
+
 ;; Processes the match between a person and a company
 to match [a b]
     ask a [
@@ -222,7 +284,7 @@ to match [a b]
     set V V - 1
 end
 
-;; Processes the fire of a person relatively to a company
+;; Processes the firing of a person relatively to a company
 to fire [a b]
   ask a [ set employed 0 ]
   ask b [ set filled 0 ]
@@ -288,7 +350,7 @@ to-report matching-quality [a b]
   report res
 end
 
-;; ----------- GRAPHIQUE -----------
+;; ----------- GRAPHICS -----------
 
 ;; Setup function for plotting agents
 to setup-plot
@@ -482,7 +544,7 @@ unexpected_worker_motivation
 unexpected_worker_motivation
 0
 1
-0.3
+0.31
 0.01
 1
 NIL
@@ -599,6 +661,86 @@ Simulation parameters
 13
 0.0
 1
+
+CHOOSER
+722
+426
+860
+471
+matching_type
+matching_type
+"default" "global_naive" "global_K" "global_L" "global_s"
+2
+
+SLIDER
+871
+412
+1043
+445
+mismatch
+mismatch
+0
+1
+0.3
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+871
+446
+1043
+479
+fraction
+fraction
+0
+1
+0.6
+0.1
+1
+NIL
+HORIZONTAL
+
+CHOOSER
+709
+536
+868
+581
+firing_type
+firing_type
+"default" "global_random" "global_decision"
+1
+
+SLIDER
+878
+522
+1091
+555
+satisfaction_deviation
+satisfaction_deviation
+0
+1
+0.6
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+891
+562
+1099
+595
+satisfaction_treshold
+satisfaction_treshold
+0
+0.6
+0.2
+0.1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
