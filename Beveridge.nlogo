@@ -57,6 +57,7 @@ to setup-globals
   set U1 unemployment
   set V vacancy
   set V1 vacancy
+  ;;-------
   set MQT matching_quality_treshold
   set FQT firing_quality_treshold
   set UF unexpected_firing
@@ -64,35 +65,26 @@ to setup-globals
   set UCM unexpected_company_motivation
   set UWM unexpected_worker_motivation
   set Npairs pairs_number
+  ;;-------
   set world-size 20
   set salary-max 20000
   set company-types-number 5
   set activities-number 20
+  ;;-------
   set convergence 0
   set convergenceMax 50
   set epsilon max (list ((unemployment + vacancy) * 3 / 100) 1)
+  ;;-------
   set plottime 0
 end
 
 ;; Initialization of global variables for plot-fig2
 to setup2-globals [U0 V0]
+  setup-globals
   set U U0
   set U1 U0
   set V V0
   set V1 V0
-  set MQT matching_quality_treshold
-  set FQT firing_quality_treshold
-  set UF unexpected_firing
-  set MPF max_productivity_fluctuation
-  set UCM unexpected_company_motivation
-  set UWM unexpected_worker_motivation
-  set Npairs pairs_number
-  set world-size 20
-  set salary-max 20000
-  set convergence 0
-  set convergenceMax 50
-  set epsilon max (list ((unemployment + vacancy) * 3 / 100) 1)
-  set plottime 0
 end
 
 ;; Initialization of agents
@@ -101,12 +93,13 @@ to setup-turtles
     set skills (list random 2 random 2 random 2 random 2 random 2)
     set location random world-size
     set salary random salary-max
-    set activity random activities-number
-    set company-type 1 + (random (company-types-number - 1))
     ;;-------
     set employed 0
     set partner 0
     set productivity random-float 1
+    set activity random activities-number
+    set company-type 1 + (random (company-types-number - 1))
+    ;;-------
     set satisfaction random-float 1
   ]
   create-companies V [
@@ -139,12 +132,10 @@ to plot-fig2
     while [V0 < 500] [
       
       setup2 plot-values U0 V0
-      
       while [checkConvergence != 1] [ go ]
-      
       set plot-values lput (list (U / U0) (V / U0)) plot-values
       
-      set V0 V0 + 100
+      set V0 V0 + 1
     ]
     set U0 U0 + 100
   ]
@@ -264,8 +255,6 @@ to-report globalMatching
   ]
 end
 
-
-
 ;; Processes the match between a person and a company
 to match [a b]
     ask a [
@@ -365,14 +354,15 @@ to setup-plot
     setxy xco loc
   ]
   ask matchings [
-    set size 10
+    set size 3
     set heading 0
+    set color orange
   ]
   
   update-plot
   set-default-shape persons "person"
   set-default-shape companies "house"
-  set-default-shape matchings "doge"
+  set-default-shape matchings "circle"
 end
 
 ;; Plotting function for agents
@@ -390,7 +380,6 @@ to update-plot
     set size 1.4
   ]
   ask matchings [
-    set size 10
   ]
   update-plot-chomage
 end
@@ -664,19 +653,19 @@ Simulation parameters
 
 CHOOSER
 722
-426
-860
-471
+401
+834
+446
 matching_type
 matching_type
 "default" "global_naive" "global_K" "global_L" "global_s"
-2
+4
 
 SLIDER
-871
-412
-1043
-445
+838
+386
+1010
+419
 mismatch
 mismatch
 0
@@ -688,10 +677,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-871
-446
-1043
-479
+838
+420
+1010
+453
 fraction
 fraction
 0
@@ -703,35 +692,35 @@ NIL
 HORIZONTAL
 
 CHOOSER
-709
-536
-868
-581
+721
+478
+835
+523
 firing_type
 firing_type
-"default" "global_random" "global_decision"
-1
+"default" "random" "decision"
+2
 
 SLIDER
-878
-522
-1091
-555
+836
+468
+1012
+501
 satisfaction_deviation
 satisfaction_deviation
 0
-1
-0.6
+0.5
+0.3
 0.1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-891
-562
-1099
-595
+836
+502
+1012
+535
 satisfaction_treshold
 satisfaction_treshold
 0
