@@ -130,12 +130,11 @@ to plot-fig2
   while [U0 < 500] [
     let V0 100
     while [V0 < 500] [
-      
       setup2 plot-values U0 V0
       while [checkConvergence != 1] [ go ]
       set plot-values lput (list (U / U0) (V / U0)) plot-values
       
-      set V0 V0 + 1
+      set V0 V0 + 100
     ]
     set U0 U0 + 100
   ]
@@ -381,7 +380,16 @@ to update-plot
   ]
   ask matchings [
   ]
+  
+  drawPartners
   update-plot-chomage
+end
+
+to drawPartners
+  clear-links
+  ask persons [
+    if(partner != 0) [ create-link-with partner ]
+  ]
 end
 
 ;; Plotting function for the unemployement graph
@@ -406,8 +414,8 @@ GRAPHICS-WINDOW
 1
 1
 0
-1
-1
+0
+0
 1
 -16
 16
