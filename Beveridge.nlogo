@@ -13,6 +13,7 @@ persons-own [
   employed partner
   productivity
   satisfaction
+  experience
 ]
 companies-own [
   skills location salary
@@ -30,6 +31,7 @@ globals [
   plottime
   activities-number
   company-types-number
+  max-experience
 ]
 
 ;; ----------- SETUP -----------
@@ -101,6 +103,7 @@ to setup-turtles
     set company-type 1 + (random (company-types-number - 1))
     ;;-------
     set satisfaction random-float 1
+    set experience 0
   ]
   create-companies V [
     set skills (list random 2 random 2 random 2 random 2 random 2)
@@ -151,6 +154,8 @@ end
 to go
   if(checkConvergence = 1) [ stop ]
   
+  if(exp_switch = true) [ updateExperience ]
+  
   if(firing_type = "default") [ firePersons ]
   if(firing_type = "random") [ firePersonsGlobal ]
   if(firing_type = "decision") [ firePersonsDecision ]
@@ -160,6 +165,34 @@ to go
 
   update-plot
   tick
+end
+
+to updateExperience 
+  ask persons [
+    if (employed > 0) [
+      set experience (experience + 1)
+    ]
+    if(experience > max_experience) [
+      fire self partner
+      
+      set skills (list random 2 random 2 random 2 random 2 random 2)
+      set location random world-size
+      set salary random salary-max
+      ;;-------
+      set employed 0
+      set partner 0
+      set productivity random-float 1
+      set activity random activities-number
+      set company-type 1 + (random (company-types-number - 1))
+      ;;-------
+      set satisfaction random-float 1
+      set experience 0
+      
+      let loc -15 + location * 30 / world-size
+      let xco -15 + random-float 10
+      setxy xco loc
+    ]
+  ]
 end
 
 ;; Checks if the unemployement rate is stable over the last ticks
@@ -297,6 +330,7 @@ to-report matching-quality [a b]
   let b-company 0
   let a-activity 0
   let b-activity 0
+  let a-experience 0
 
   ask a [
     set a-skills skills
@@ -304,6 +338,7 @@ to-report matching-quality [a b]
     set a-salary salary
     set a-activity activity
     set a-company company-type
+    set a-experience experience
   ]
   ask b [
     set b-skills skills
@@ -329,7 +364,12 @@ to-report matching-quality [a b]
   set temp max (list a-salary b-salary)
   set res res + (1 - abs(a-salary - b-salary) / temp ) ;; salary
 
-  set res res / 5 ;;normalize
+  ifelse(exp_switch = true) [
+    let temp 2 * (a-experience / max_experience )
+    set temp max temp 1
+    set res ( (res + temp ) / 6 )
+  ]
+  [ set res res / 5 ] ;;normalize
   
   ;; bonuses
   if (random-float 1 < UCM) [ set res res * 1.1 ]
@@ -436,7 +476,7 @@ unemployment
 unemployment
 10
 500
-190
+210
 10
 1
 NIL
@@ -451,7 +491,7 @@ vacancy
 vacancy
 10
 500
-500
+210
 10
 1
 NIL
@@ -496,7 +536,7 @@ unexpected_firing
 unexpected_firing
 0
 0.2
-0.1
+0.095
 0.005
 1
 NIL
@@ -556,7 +596,7 @@ pairs_number
 pairs_number
 0
 100
-40
+60
 1
 1
 NIL
@@ -667,7 +707,7 @@ CHOOSER
 matching_type
 matching_type
 "default" "global_naive" "global_K" "global_L" "global_s"
-4
+0
 
 SLIDER
 838
@@ -707,7 +747,7 @@ CHOOSER
 firing_type
 firing_type
 "default" "random" "decision"
-2
+0
 
 SLIDER
 836
@@ -735,6 +775,32 @@ satisfaction_treshold
 0.6
 0.2
 0.1
+1
+NIL
+HORIZONTAL
+
+SWITCH
+720
+575
+832
+608
+exp_switch
+exp_switch
+1
+1
+-1000
+
+SLIDER
+841
+574
+1013
+607
+max_experience
+max_experience
+0
+50
+47
+1
 1
 NIL
 HORIZONTAL
