@@ -313,8 +313,14 @@ end
 
 ;; Processes the firing of a person relatively to a company
 to fire [a b]
-  ask a [ set employed 0 ]
-  ask b [ set filled 0 ]
+  ask a [
+    set employed 0 
+    set partner 0
+  ]
+  ask b [
+    set filled 0
+    set partner 0
+  ]
   ask matchings [
     set person-list lput a person-list
     set company-list lput b company-list
@@ -629,7 +635,7 @@ pairs_number
 pairs_number
 0
 100
-1
+30
 1
 1
 NIL
