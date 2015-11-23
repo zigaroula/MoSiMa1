@@ -136,7 +136,7 @@ to plot-fig2
     let V0 100
     while [V0 < 500] [
       setup2 plot-values U0 V0
-      while [checkConvergence != 1] [ go ]
+      while [checkConvergence != 1 and ticks < 5000] [ go ]
       set plot-values lput (list (U / U0) (V / U0)) plot-values
       
       set V0 V0 + 100
@@ -156,7 +156,7 @@ end
 to go
   set tick-matches 0
   
-  if(checkConvergence = 1) [ stop ]
+  if(checkConvergence = 1 or ticks > 5000) [ stop ]
   
   if(exp_switch = true) [ updateExperience ]
   
@@ -629,7 +629,7 @@ pairs_number
 pairs_number
 0
 100
-50
+1
 1
 1
 NIL
