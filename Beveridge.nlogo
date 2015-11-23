@@ -32,6 +32,7 @@ globals [
   activities-number
   company-types-number
   max-experience
+  tick-matches
 ]
 
 ;; ----------- SETUP -----------
@@ -78,6 +79,7 @@ to setup-globals
   set epsilon max (list ((unemployment + vacancy) * 3 / 100) 1)
   ;;-------
   set plottime 0
+  set tick-matches 0
 end
 
 ;; Initialization of global variables for plot-fig2
@@ -152,6 +154,8 @@ end
 
 ;; Repeated every tick
 to go
+  set tick-matches 0
+  
   if(checkConvergence = 1) [ stop ]
   
   if(exp_switch = true) [ updateExperience ]
@@ -164,6 +168,7 @@ to go
   [ doMatchesGlobal ]  
 
   update-plot
+  
   tick
 end
 
@@ -248,6 +253,7 @@ to doMatches
         let b one-of company-list
         if (matching-quality a b >= MQT) [
           match a b
+          set tick-matches (tick-matches + 1)
         ]
       ]
       set cpt cpt + 1
@@ -423,6 +429,8 @@ to update-plot
   
   drawPartners
   update-plot-chomage
+  update-plot-productivity
+  update-plot-matchings
 end
 
 to drawPartners
@@ -438,6 +446,31 @@ to update-plot-chomage
   set plottime (plottime + 1)
   
   plotxy plottime U
+end
+
+to update-plot-productivity
+  set-current-plot "productivity"
+  set plottime (plottime + 1)
+  let mean-productivity 0
+  let mean-factor 1
+  foreach sort persons [
+    ask ? [
+      if (employed = 1) [
+        set mean-productivity (mean-productivity + productivity)
+        set mean-factor (mean-factor + 1)
+      ]
+    ]
+  ]
+  set mean-productivity (mean-productivity / mean-factor)
+  plotxy plottime mean-productivity
+end
+
+to update-plot-matchings
+  set-current-plot "matchings"
+  set plottime (plottime + 1)
+  if (tick-matches > 0) [
+    plotxy plottime tick-matches
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -476,7 +509,7 @@ unemployment
 unemployment
 10
 500
-210
+250
 10
 1
 NIL
@@ -491,7 +524,7 @@ vacancy
 vacancy
 10
 500
-210
+250
 10
 1
 NIL
@@ -536,7 +569,7 @@ unexpected_firing
 unexpected_firing
 0
 0.2
-0.095
+0.1
 0.005
 1
 NIL
@@ -551,7 +584,7 @@ max_productivity_fluctuation
 max_productivity_fluctuation
 0
 1
-0.4
+0.3
 0.01
 1
 NIL
@@ -581,7 +614,7 @@ unexpected_worker_motivation
 unexpected_worker_motivation
 0
 1
-0.31
+0.3
 0.01
 1
 NIL
@@ -596,7 +629,7 @@ pairs_number
 pairs_number
 0
 100
-60
+50
 1
 1
 NIL
@@ -661,7 +694,7 @@ PLOT
 fig2
 u
 v
-0.0
+0.75
 1.0
 0.0
 4.0
@@ -804,6 +837,42 @@ max_experience
 1
 NIL
 HORIZONTAL
+
+PLOT
+497
+168
+697
+318
+productivity
+ticks
+productivity
+0.0
+10.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" ""
+
+PLOT
+497
+326
+697
+476
+matchings
+plottime
+matchings
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" ""
 
 @#$#@#$#@
 ## WHAT IS IT?
