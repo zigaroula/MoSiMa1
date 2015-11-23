@@ -365,8 +365,8 @@ to-report matching-quality [a b]
   set res res + (1 - abs(a-salary - b-salary) / temp ) ;; salary
 
   ifelse(exp_switch = true) [
-    let temp 2 * (a-experience / max_experience )
-    set temp max temp 1
+    set temp 2 * (a-experience / max_experience )
+    if(temp > 1) [set temp 1]
     set res ( (res + temp ) / 6 )
   ]
   [ set res res / 5 ] ;;normalize
